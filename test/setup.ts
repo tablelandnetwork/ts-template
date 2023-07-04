@@ -1,10 +1,12 @@
 import { after, before } from "mocha";
 import { LocalTableland } from "@tableland/local";
 
-const lt = new LocalTableland({ silent: true });
+const lt = new LocalTableland({
+  silent: true,
+});
 
 before(async function () {
-  this.timeout(15000);
+  this.timeout(30000);
   await lt.start();
 });
 

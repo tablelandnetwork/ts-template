@@ -1,31 +1,23 @@
-import { strictEqual, deepStrictEqual } from "assert";
+import assert, { strictEqual } from "assert";
 import { describe, test } from "mocha";
-import { getAccounts, getConnection } from "@tableland/local";
+import { getDefaultProvider } from "ethers";
+import { getAccounts } from "@tableland/local";
+import { hello } from "../src/index";
 
-describe("index", function () {
-  // Note that we're using the second account here
-  const [, signer] = getAccounts();
-  const sdk = getConnection(signer);
+describe("hello", function () {
+  // Set a timeout for spinning up the Local Tableland instance during setup
+  this.timeout(10000);
 
-  test("create", async function () {
-    const { name } = await sdk.create("counter integer", { prefix: "table" });
-    strictEqual(name, "table_31337_2");
-  });
+  // Retrieve accounts from Local Tableland & create a signer
+  const accounts = getAccounts();
+  const wallet = accounts[1]; // Note that we're using the second account here
+  const provider = getDefaultProvider("http://127.0.0.1:8545");
+  const signer = wallet.connect(provider);
 
-  test("insert", async function () {
-    const { hash } = await sdk.write("insert into table_31337_2 values (1);");
-    const txnReceipt = await sdk.receipt(hash);
-    strictEqual(txnReceipt?.chainId, 31337);
-  });
-
-  test("update", async function () {
-    const { hash } = await sdk.write("update table_31337_2 set counter=2;");
-    const txnReceipt = await sdk.receipt(hash);
-    strictEqual(txnReceipt?.chainId, 31337);
-  });
-
-  test("query", async function () {
-    const { rows } = await sdk.read("select * from table_31337_2;");
-    deepStrictEqual(rows[0], [2]);
+  // Run your tests, such as passing the signer to `hello()`
+  test("should return 'world'", async function () {
+    const data = await hello(signer);
+    assert(data != null);
+    strictEqual(data, "world");
   });
 });
